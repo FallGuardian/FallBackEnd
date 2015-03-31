@@ -1,4 +1,22 @@
 <?php
+	function storeCalResult($dbh, $colName, $colValue, $base_id)
+	{
+		$sql = "UPDATE `final_physical_cal` SET ".$colName."=? WHERE `base_id`=? ";
+		$statement = $dbh->prepare($sql);
+		$statement->bindParam(1,$colValue);
+		$statement->bindParam(2,$base_id);
+		return $statement->execute();
+	}
+
+	function getPrimitivesCols($dbh,$colsNameArray)
+	{
+		$colsStr = implode(",", $colsNameArray);
+		$sql="SELECT ".$colsStr." FROM `final_primitive`";
+		$statement = $dbh->prepare($sql);
+		$statement->execute();
+		return $statement->fetchAll();
+		
+	}
 	function getFallIds($dbh)
 	{
 		# Get fail_id (true fall, system detected)
@@ -94,12 +112,12 @@
 	}
 	function getSingleData($dbh, $id)
 	{
-		$sql="SELECT * FROM `id_base` WHERE `id`=?";
+		$sql="SELECT * FROM `final_physical_cal` WHERE `base_id`=?";
 		$dbStatement = $dbh->prepare($sql);
 		$dbStatement->bindParam(1,$id);
 		$dbStatement->execute();
 		$data = $dbStatement->fetchAll(PDO::FETCH_ASSOC);
-		return $data[0]['id'];
+		return $data[0]['label'];
 	}
 	function getPrimitiveAll($dbh)
 	{

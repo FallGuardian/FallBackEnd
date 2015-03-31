@@ -27,8 +27,8 @@
 
 	$one_empty=false;
 	
-	// foreach ($_POST as $key => $value) {
-	// 	if($value=="")
+	// foreach ($_POST as $key => $label) {
+	// 	if($label=="")
 	// 		$one_empty=true;
 
 	// }
@@ -58,10 +58,11 @@
 			# Get the keyin id Base_id	
 				echo 'use keyin data <br>';
 				$keyInIdDatas = array();
-				foreach ($keyInIds as $key => $value) {
+				foreach ($keyInIds as $key => $label) {
 
-					$data = getSingleData($dbh, $value);
-					$keyInIdDatas[$value]=(sizeof($data)!=0)?$data:'0';
+					$data = getSingleData($dbh, $label);
+
+					$keyInIdDatas[$label]=(sizeof($data)!=0)?$data:'0';
 				}
 				$targetBaseId = $keyInIdDatas;
 			}
@@ -69,14 +70,15 @@
 			$total = count($targetBaseId);
 			echo 'total:'.$total.'<br>';
 
-			# Get fail_id (true fall, system detected)
-			$fall_id = getFallIds($dbh);
+			// # Get fail_id (true fall, system detected)
+			// $fall_id = getFallIds($dbh);
 
-			# Get stand_id (mis-judge to fall, not fall, but system detect)
-			$stand_id = getStandIds($dbh);
+			// # Get stand_id (mis-judge to fall, not fall, but system detect)
+			// $stand_id = getStandIds($dbh);
 
-			# Get adjust_id (true fail , system not detected)
-			$adjust_id = getAdjustId($dbh);
+			// # Get adjust_id (true fail , system not detected)
+			// $adjust_id = getAdjustId($dbh);
+
 
 			$t_f_cnt = 0;				
 			$m_j_f_cnt = 0;
@@ -93,20 +95,21 @@
 					$errorKeysPos = "";
 					$thesholdCnt = 0;
 					$maxCount = 0;
+
 					# Find Max Count in fall Ids, as new theshold
-					foreach ($targetBaseId as $key => $value){
-						if(array_search($key, $fall_id))
-							$maxCount = max($maxCount, findOverThesholdInPrimitive($dbh, $value, $i, ($j/10)));
+					foreach ($targetBaseId as $key => $label){
+						if($label == 1)
+							$maxCount = max($maxCount, findOverThesholdInPrimitive($dbh, $label, $i, ($j/10)));
 					}
 
-					# Run Alla Target Ids
-					foreach ($targetBaseId as $key => $value) {
+					# Run All Target Ids
+					foreach ($targetBaseId as $key => $label) {
 							
 							#our prediction of fall
-							$cnt = findOverThesholdInPrimitive($dbh, $value, $i, ($j/10) );
+							$cnt = findOverThesholdInPrimitive($dbh, $key, $i, ($j/10) );
 							if($cnt>0){
-								# real result of fall
-								if(array_search($key, $stand_id)){
+						
+								if($label == 0){
 									$m_j_f_cnt++;
 									$errorKeysNeg.=$key.',';
 
@@ -118,7 +121,7 @@
 							else{
 
 								# real result of fall
-								if(array_search($key, $fall_id)){
+								if($label == 1){
 									$t_f_cnt++;
 									$errorKeysPos.=$key.',';
 								}
@@ -147,14 +150,13 @@
 				}
 			}
 
-			// $minErr = min($rstErr);
-			// arsort($rstErr);
+			$minErr = min($rstErr);
+			arsort($rstErr);
 			
 			// foreach ($rstErr as $k => $v) {
 			// 	echo ' [ '.$k.' ] '.'Min Error Rate: '.$v.'{'.$errorKeys[$k].'}<br>';
 			// }
-			
-			
+		
 	}else{
 		echo 'at least one of input is empty';
 	}
